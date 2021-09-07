@@ -76,3 +76,76 @@ peer.on("call", function (call) {
 peer.on("open", (id) => {
   socket.emit("join-room", ROOM_ID, id);
 });
+
+// CHAT
+
+const connectToNewUser = (userId, streams) => {
+  var call = peer.call(userId, streams);
+  console.log(call);
+  var video = document.createElement("video");
+  call.on("stream", (userVideoStream) => {
+    console.log(userVideoStream);
+    addVideoStream(video, userVideoStream);
+  });
+};
+
+const addVideoStream = (videoEl, stream) => {
+  videoEl.srcObject = stream;
+  videoEl.addEventListener("loadedmetadata", () => {
+    videoEl.play();
+  });
+
+  videoGrid.append(videoEl);
+  let totalUsers = document.getElementsByTagName("video").length;
+  if (totalUsers > 1) {
+    for (let index = 0; index < totalUsers; index++) {
+      document.getElementsByTagName("video")[index].style.width =
+        100 / totalUsers + "%";
+    }
+  }
+};
+
+const playStop = () => {
+  let enabled = myVideoStream.getVideoTracks()[0].enabled;
+  if (enabled) {
+    myVideoStream.getVideoTracks()[0].enabled = false;
+    setPlayVideo();
+  } else {
+    setStopVideo();
+    myVideoStream.getVideoTracks()[0].enabled = true;
+  }
+};
+
+const muteUnmute = () => {
+  const enabled = myVideoStream.getAudioTracks()[0].enabled;
+  if (enabled) {
+    myVideoStream.getAudioTracks()[0].enabled = false;
+    setUnmuteButton();
+  } else {
+    setMuteButton();
+    myVideoStream.getAudioTracks()[0].enabled = true;
+  }
+};
+
+const setPlayVideo = () => {
+  const html = `<i class="unmute fa fa-pause-circle"></i>
+  <span class="unmute">Resume Video</span>`;
+  document.getElementById("playPauseVideo").innerHTML = html;
+};
+
+const setStopVideo = () => {
+  const html = `<i class=" fa fa-video-camera"></i>
+  <span class="">Pause Video</span>`;
+  document.getElementById("playPauseVideo").innerHTML = html;
+};
+
+const setUnmuteButton = () => {
+  const html = `<i class="unmute fa fa-microphone-slash"></i>
+  <span class="unmute">Unmute</span>`;
+  document.getElementById("muteButton").innerHTML = html;
+};
+const setMuteButton = () => {
+  const html = `<i class="fa fa-microphone"></i>
+  <span>Mute</span>`;
+  document.getElementById("muteButton").innerHTML = html;
+};
